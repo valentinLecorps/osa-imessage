@@ -26,6 +26,13 @@ var imessage = require('osa-imessage')
 imessage.send('+15555555555', 'Hello World!')
 ```
 
+**Send a file**
+```js
+var imessage = require('osa-imessage')
+
+imessage.send('+15555555555', '/tmp/picture.png', true)
+```
+
 **Receive messages**
 ```js
 var imessage = require('osa-imessage')

@@ -60,8 +60,8 @@ function handleForName(name) {
 }
 
 // Sends a message to the given handle
-function send(handle, message) {
-    assert(typeof handle  == 'string', 'handle must be a string')
+function send(handle, message, isFile) {
+    assert(typeof handle == 'string', 'handle must be a string')
     assert(typeof message == 'string', 'message must be a string')
     return osa((handle, message) => {
         var Messages = Application('Messages')
@@ -70,13 +70,22 @@ function send(handle, message) {
 
         try {
             target = Messages.buddies.whose({ handle: handle })[0]
-        } catch(e) {}
-
-        try {
-            target = Messages.textChats.byId('iMessage;+;'+handle)()
         } catch (e) {}
 
         try {
+            target = Messages.textChats.byId('iMessage;+;' + handle)()
+        } catch (e) {}
+
+        if (isFile) {
+            try {
+                message = Path(message);
+            } catch (e) {
+                throw new Error(`invalid file path '${message}'`)
+            }
+        }
+
+        try {
+
             Messages.send(message, { to: target })
         } catch (e) {
             throw new Error(`no thread with handle '${handle}'`)
@@ -86,6 +95,7 @@ function send(handle, message) {
 
 var emitter = null
 var guids = []
+
 function listen() {
     // If listen has already been run, return the existing emitter
     if (emitter != null) {
@@ -93,7 +103,7 @@ function listen() {
     }
 
     // Create an EventEmitter
-    var emitter = new (require('events').EventEmitter)()
+    var emitter = new(require('events').EventEmitter)()
 
     // Set up the database
     var sqlite = requireSqlite()
@@ -150,7 +160,7 @@ function listen() {
             })
         }, () => {
             if (bail) return
-            setTimeout(check , 1000)
+            setTimeout(check, 1000)
         })
 
     }
