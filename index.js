@@ -63,7 +63,7 @@ function handleForName(name) {
 function send(handle, message, isFile) {
     assert(typeof handle == 'string', 'handle must be a string')
     assert(typeof message == 'string', 'message must be a string')
-    return osa((handle, message) => {
+    return osa((handle, message, isFile) => {
         var Messages = Application('Messages')
 
         var target;
@@ -90,7 +90,7 @@ function send(handle, message, isFile) {
         } catch (e) {
             throw new Error(`no thread with handle '${handle}'`)
         }
-    })(handle, message)
+    })(handle, message, isFile)
 }
 
 var emitter = null
