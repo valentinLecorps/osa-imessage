@@ -93,6 +93,7 @@ function send(handle, message, isFile) {
     })(handle, message, isFile)
 }
 
+
 var emitter = null
 var guids = []
 
@@ -113,7 +114,6 @@ function listen() {
     )
 
     var last = appleTimeNow()
-    var bail = false
 
     function check() {
         var query = `
@@ -127,27 +127,19 @@ function listen() {
                 cache_roomnames
             FROM message
             LEFT OUTER JOIN handle ON message.handle_id = handle.ROWID
-            WHERE date >= ${last - 5}
+            WHERE date >= ${last - 10}
         `
-
         last = appleTimeNow()
 
         db.each(query, (err, row) => {
             if (err) {
-                bail = true
-                emitter.emit('error', err)
-                console.error([
-                    'sqlite3 returned an error while polling for new message!',
-                    'bailing out of poll routine for safety. new messages will',
-                    'not be detected'
-                ].join('\n'))
+                return console.log('sqlite3 returned an error while polling for new message!');
             }
-
             if (guids.indexOf(row.guid) != -1) {
                 return
-            } else {
-                guids.push(row.guid)
             }
+
+            guids.push(row.guid);
 
             emitter.emit('message', {
                 guid: row.guid,
@@ -159,10 +151,8 @@ function listen() {
                 dateRead: fromAppleTime(row.date_read)
             })
         }, () => {
-            if (bail) return
             setTimeout(check, 1000)
         })
-
     }
 
     check()
